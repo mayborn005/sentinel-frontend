@@ -1,5 +1,7 @@
 # Stellar Sentinel Frontend
 
+[Open the live dashboard](https://sentinel-frontend-gules.vercel.app)
+
 Stellar Sentinel is a dashboard for screening Stellar account activity and reviewing Soroban contract flag events. Scores are transparent off-chain signals; they do not submit a transaction or create a contract flag.
 
 ## Architecture
@@ -14,7 +16,7 @@ flowchart LR
   Contract[Soroban Sentinel contract] -->|flagged events| RPC
 ```
 
-The browser uses the backend as its only application API. It renders account metrics and signal explanations, the current network/RPC status, and a paginated contract event feed. The event feed requires a deployed contract ID configured in the backend.
+The browser uses the backend as its only application API. It renders account metrics and signal explanations, the current network/RPC status, and a paginated contract event feed. If loading an older event page fails, already-loaded events remain visible and the failed cursor can be retried. The dashboard keeps up to five successful account assessments in the current page session so analysts can revisit recent results without storing them across reloads. The event feed requires a deployed contract ID configured in the backend.
 
 ## Stellar Testnet deployment
 
@@ -60,4 +62,8 @@ Set `NEXT_PUBLIC_API_BASE_URL` in `.env.local` (default: `http://localhost:8000`
 - `GET /events?limit=20&cursor=...` returns paginated contract events.
 - `GET /network/status` reports the Stellar network, Soroban RPC health, and latest ledger.
 
+When the backend identifies the network as Public Network or Testnet, account, contract, and available transaction references link to the matching Stellar Expert explorer. Unknown networks and missing transaction hashes remain plain text.
+
 Keep response changes coordinated with the backend. Errors, loading, and empty states should remain explicit; do not replace missing chain data with sample values.
+
+If a new account screening request fails after a successful assessment, the dashboard keeps the last successful result visible and shows the new request error above it.
